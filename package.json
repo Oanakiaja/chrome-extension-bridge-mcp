@@ -8,10 +8,10 @@
     "debug": "npx @modelcontextprotocol/inspector tsx examples/mcp.ts",
     "lint": "eslint src --ext .ts"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["chrome extension", "mcp", "model-context-protocol", "websocket", "mcp-server"],
+  "author": "oanakiaja",
   "license": "MIT",
-  "description": "",
+  "description": "A ",
   "devDependencies": {
     "@eslint/js": "^9.23.0",
     "@types/ws": "^8.18.0",
