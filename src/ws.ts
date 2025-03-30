@@ -24,39 +24,33 @@ class WSClient {
     });
 
     this._ws.on("connection", (ws) => {
-      console.log("已连接到 MCP 服务器");
+      // 保存 socket 对象 ，建立单点连接
       if (this._socket) {
-        return;
+        this._socket.close();
       }
-
-      this._ws.on("message", (event) => {
+      this._socket = ws;
+      this._socket.on("message", (event) => {
         try {
           const response = JSON.parse(event.toString());
-          console.log("收到服务器响应:", response);
           if (this._callbacks.has(response.id)) {
-            this._callbacks.get(response.id)?.(response.result);
+            const resolve = this._callbacks.get(response.id)!;
+            resolve(response);
             this._callbacks.delete(response.id);
           }
         } catch (err) {
           console.error("解析响应失败:", err);
         }
       });
-
-      // 保存 socket 对象 ，建立单点连接
-      this._socket = ws;
     });
 
     return this;
   }
 
-  private _call({
-    method,
-    params,
-  }: {
-    method: `mcp:tool.${string}` | `mcp:resource.${string}`;
-    params: unknown[];
-  }) {
-      return new Promise((resolve, reject) => {
+  private _call(
+    method: `mcp:tool.${string}` | `mcp:resource.${string}`,
+    params?: Record<string, unknown>
+  ) {
+    return new Promise((resolve, reject) => {
       if (!this._socket) {
         reject(new Error("没有 web 端 socket 连接"));
         return;
@@ -67,29 +61,26 @@ class WSClient {
       const message = {
         id,
         method,
-        params,
+        params: params || {},
       };
       this._socket.send(JSON.stringify(message));
     });
   }
 
-  async send({
-    method,
-    params,
-  }: {
-    method: `mcp:tool.${string}` | `mcp:resource.${string}`;
-    params: unknown[];
-  }) : Promise<{
+  async send(
+    method: `mcp:tool.${string}` | `mcp:resource.${string}`,
+    params?: Record<string, unknown>
+  ): Promise<{
     content: {
-      type: 'text';
+      type: "text";
       text: string;
     }[];
     isError?: true;
   }> {
     try {
-      const { result, error } = (await this._call({ method, params })) as {
-        result: unknown;
-        error: unknown;
+      const { result = "", error } = (await this._call(method, params)) as {
+        result: string;
+        error: string;
       };
       if (error) {
         throw new Error(error as string);
@@ -98,7 +89,7 @@ class WSClient {
         content: [
           {
             type: "text",
-            text: JSON.stringify(result),
+            text: result,
           },
         ],
       };

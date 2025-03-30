@@ -82,7 +82,7 @@ class RPCResponse {
   toJSON() {
     return {
       id: this.id,
-      result: this.result
+      result: this.result || '' // 如果 result 为 undefined，则返回空字符串, JSONRPC required
     };
   }
 }

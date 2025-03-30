@@ -21,7 +21,7 @@ server.tool(
   "use window.alert",
   { message: z.string() },
   async ({ message }) => {
-    const response = await client.callToolExtension("alert", message);
+    const response = await client.callToolExtension("alert", { message });
     return response;
   }
 );
