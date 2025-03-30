@@ -1,4 +1,4 @@
-# Chrome Extension Socket MCP
+# Chrome Extension Bridge MCP
 
 A Chrome extension that establishes a WebSocket connection between web pages and a local MCP server. This allows you to interact with web page resources and execute functions from your mcp server.
 
