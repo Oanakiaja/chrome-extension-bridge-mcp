@@ -82,7 +82,7 @@ class RPCResponse {
   toJSON() {
     return {
       id: this.id,
-      result: this.result || '' // 如果 result 为 undefined，则返回空字符串, JSONRPC required
+      result: this.result || '' // If result is undefined, return empty string, JSONRPC required
     };
   }
 }
@@ -106,12 +106,11 @@ class WS {
     } 
     this._ws.onmessage = async (event) => {
       try {
-        console.log('收到服务器响应:', event);
+        console.log('response by MCP server:', event);
         const { id, method, params } = JSON.parse(event.data);
         const res = await this.handle(method, params);
         this.response(id, res);
       } catch (e) {
-        console.error(e);
         this.error(null, e instanceof RPCError ? e : new RPCError(RPCErrorCodes.InternalError, e.message, e));
       }    
     }
@@ -211,7 +210,7 @@ class WS {
    * @param {any} result - response result
    */
   response(id, result) {
-    console.log('发送成功响应:', id, result);
+    console.log('send:', id, result);
     const response = new RPCResponse(id, result);
     this._ws.send(JSON.stringify(response.toJSON()));
   }
@@ -227,14 +226,13 @@ class WS {
   } 
 }
 
-// 立即执行的调试代码
+// Extension debug code
 (function debugExtension() {
-  console.log('扩展内容脚本加载 - 时间:', new Date().toISOString());
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('页面 DOM 已加载 - URL:', window.location.href);
+    // Page DOM loaded
   });
   
-  // 创建一个视觉元素确认扩展正在运行
+  // Create a visual element to confirm extension is running
   try {
     const debugElement = document.createElement('div');
     debugElement.style.position = 'fixed';
@@ -245,18 +243,18 @@ class WS {
     debugElement.style.padding = '5px';
     debugElement.style.borderRadius = '3px';
     debugElement.style.fontSize = '12px';
-    debugElement.textContent = 'MCP扩展已加载';
+    debugElement.textContent = 'MCP Extension Loaded';
     
-    // 等待DOM准备好
+    // Wait for DOM ready
     if (document.body) {
       document.body.appendChild(debugElement);
     } else {
-      window.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(debugElement);
       });
     }
   } catch (e) {
-    console.error('创建调试元素失败:', e);
+    console.error('create debug element failed:', e);
   }
 })();
 

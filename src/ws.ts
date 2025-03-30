@@ -3,7 +3,7 @@ import { uuid } from "./utils/uuid";
 
 class WSClient {
   _ws: WebSocketServer;
-  _socket: WebSocket; // one single socket from conne
+  _socket: WebSocket; // one single socket from connection
   _callbacks: Map<string, (value: unknown) => void>;
 
   constructor() {
@@ -15,16 +15,16 @@ class WSClient {
       port,
     });
 
-    this._ws.on("error", (error) => {
-      console.error("WebSocket 错误:", error);
+    this._ws.on("error", () => {
+      // Error handler remains but without console.log
     });
 
     this._ws.on("close", () => {
-      console.log("连接已关闭");
+      // Connection closed handler without console.log
     });
 
     this._ws.on("connection", (ws) => {
-      // 保存 socket 对象 ，建立单点连接
+      // Save socket object, establish single connection
       if (this._socket) {
         this._socket.close();
       }
@@ -37,8 +37,8 @@ class WSClient {
             resolve(response);
             this._callbacks.delete(response.id);
           }
-        } catch (err) {
-          console.error("解析响应失败:", err);
+        } catch {
+          // Parse response failed handler without console.error
         }
       });
     });
@@ -52,7 +52,7 @@ class WSClient {
   ) {
     return new Promise((resolve, reject) => {
       if (!this._socket) {
-        reject(new Error("没有 web 端 socket 连接"));
+        reject(new Error("No web socket connection"));
         return;
       }
 
