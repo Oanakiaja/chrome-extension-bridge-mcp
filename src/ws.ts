@@ -1,5 +1,5 @@
 import { WebSocketServer, type WebSocket } from "ws";
-import { uuid } from "./utils";
+import { uuid } from "./utils/uuid";
 
 class WSClient {
   _ws: WebSocketServer;

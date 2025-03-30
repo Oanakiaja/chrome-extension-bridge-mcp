@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/server.ts",
-    "debug": "npx @modelcontextprotocol/inspector tsx src/mcp.ts",
+    "debug": "npx @modelcontextprotocol/inspector tsx examples/mcp.ts",
     "lint": "eslint src --ext .ts"
   },
   "keywords": [],

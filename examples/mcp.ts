@@ -1,14 +1,12 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { Tools } from "../src/tools";
-import { Resources } from "../src/resource";
-import { WSClient } from "../src/ws";
+import { Client } from "../src/client";
 
 const port = 54319;
-const ws = new WSClient().connect(port);
-const tools = new Tools(ws);
-const resources = new Resources(ws);
+const client = new Client(port);
+
+await client.connect();
 
 // Create an MCP server
 const server = new McpServer({
@@ -23,13 +21,13 @@ server.tool(
   "use window.alert",
   { message: z.string() },
   async ({ message }) => {
-    const response = await tools.callExtension("alert", message);
+    const response = await client.callToolExtension("alert", message);
     return response;
   }
 );
 
 server.resource("userAgent", "useragent://chrome", async (uri) => {
-  const { content } = await resources.callExtension("navigator.userAgent");
+  const { content } = await client.callResourceExtension("navigator.userAgent");
   return {
     contents: [
       {
@@ -43,8 +41,8 @@ server.resource("userAgent", "useragent://chrome", async (uri) => {
 const transport = new StdioServerTransport();
 await server.connect(transport);
 
-process.on("SIGINT", () => {
+process.on("SIGINT", async () => {
   console.log("SIGINT 信号接收");
-  ws.disconnect();
+  await client.dispose();
   process.exit(0);
 });
