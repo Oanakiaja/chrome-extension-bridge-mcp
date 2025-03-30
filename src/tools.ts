@@ -1,3 +1,4 @@
+import { McpExportBridge } from "./bridge";
 import { WSClient } from "./ws";
 
 export type Tool<T extends Record<string, unknown>> = {
@@ -9,23 +10,13 @@ export type Tool<T extends Record<string, unknown>> = {
 };
 
 function tool(functionChain: string) {
-  return `mcp:tool.${functionChain}`;
+  return `mcp:tool.${functionChain}` as `mcp:tool.${string}`;
 }
 
-class Tools {
-  ws: WSClient;
 
+class Tools extends McpExportBridge {
   constructor(ws: WSClient) {
-    this.ws = ws;
-  }
-
-  async callExtension(method: string, ...params: unknown[]) {
-    const message = {
-      method: tool(method) as `mcp:tool.${string}`,
-      params: params,
-    };
-    const response = await this.ws.send(message);
-    return response
+    super(ws, tool);
   }
 }
 

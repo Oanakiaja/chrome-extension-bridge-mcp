@@ -1,5 +1,6 @@
 import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WSClient } from "./ws";
+import { McpExportBridge } from "./bridge";
 
 export type Resource<T extends Record<string, unknown>> = {
   name: string;
@@ -8,23 +9,12 @@ export type Resource<T extends Record<string, unknown>> = {
 }
 
 function resource(functionChain: string) {
-  return `mcp:resource.${functionChain}`;
+  return `mcp:resource.${functionChain}` as `mcp:resource.${string}`;
 }
 
-
-class Resources {
-  ws: WSClient;
-
+class Resources extends McpExportBridge {
   constructor(ws: WSClient) {
-    this.ws = ws;
-  }
-  
-  _callExtension(method: string, params: unknown[]) {
-    const message = {
-      method: resource(method) as `mcp:resource.${string}`,
-      params: params
-    }
-    this.ws.send(message)
+    super(ws, resource);
   }
 }
 

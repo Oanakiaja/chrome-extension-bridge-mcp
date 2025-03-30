@@ -1,14 +1,16 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { Tools } from "./tools";
-import { WSClient } from "./ws";
+import { Tools } from "../src/tools";
+import { Resources } from "../src/resource";
+import { WSClient } from "../src/ws";
 
 const port = 54319;
 const ws = new WSClient().connect(port);
 const tools = new Tools(ws);
+const resources = new Resources(ws);
 
-// // Create an MCP server
+// Create an MCP server
 const server = new McpServer({
   name: "Extension-Socket-Server",
   version: "1.0.0",
@@ -25,6 +27,18 @@ server.tool(
     return response;
   }
 );
+
+server.resource("userAgent", "useragent://chrome", async (uri) => {
+  const { content } = await resources.callExtension("navigator.userAgent");
+  return {
+    contents: [
+      {
+        uri: uri.href,
+        text: content[0].text,
+      },
+    ],
+  };
+});
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
