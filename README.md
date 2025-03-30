@@ -4,6 +4,8 @@ A Chrome extension that establishes a WebSocket connection between web pages and
 
 Inspired by [playcanvas/editor-mcp-server](https://github.com/playcanvas/editor-mcp-server).
 
+![Example](./assets/example-1.webp)
+
 ## Overview
 
 This project consists of two main components:
@@ -156,10 +158,6 @@ The extension uses a simple JSON-RPC-like protocol:
   "result": "Mozilla/5.0 ..."
 }
 ```
-
-## Examples
-
-![Example](./assets/example-1.webp)
 
 ## License
 
