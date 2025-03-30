@@ -1,15 +1,13 @@
-import { WebSocketServer } from "ws";
+import { WebSocketServer, type WebSocket } from "ws";
 import { uuid } from "./utils";
 
 class WSClient {
   _ws: WebSocketServer;
-  _callbacks: Record<
-    string,
-    { resolve: (result: unknown) => void; reject: (error: unknown) => void }
-  >;
+  _socket: WebSocket; // one single socket from conne
+  _callbacks: Map<string, (value: unknown) => void>;
 
   constructor() {
-    this._callbacks = {};
+    this._callbacks = new Map();
   }
 
   connect(port: number) {
@@ -27,47 +25,94 @@ class WSClient {
 
     this._ws.on("connection", (ws) => {
       console.log("已连接到 MCP 服务器");
+      if (this._socket) {
+        return;
+      }
 
       this._ws.on("message", (event) => {
         try {
           const response = JSON.parse(event.toString());
           console.log("收到服务器响应:", response);
-          if (response.id in this._callbacks) {
-            this._callbacks[response.id].resolve(response.result);
-            delete this._callbacks[response.id];
-          } 
+          if (this._callbacks.has(response.id)) {
+            this._callbacks.get(response.id)?.(response.result);
+            this._callbacks.delete(response.id);
+          }
         } catch (err) {
           console.error("解析响应失败:", err);
         }
       });
 
-      const pingMessage = {
-        id: "0",
-        method: "mcp:resource.navigator.userAgent",
-        params: [],
-      };
-
-      ws.send(JSON.stringify(pingMessage));
+      // 保存 socket 对象 ，建立单点连接
+      this._socket = ws;
     });
 
     return this;
   }
 
-  send({
+  private _call({
     method,
     params,
   }: {
     method: `mcp:tool.${string}` | `mcp:resource.${string}`;
     params: unknown[];
   }) {
-    const message = {
-      id: uuid(),
-      method,
-      params,
-    };
-    this._ws.clients.forEach((client) => {
-      client.send(JSON.stringify(message));
+      return new Promise((resolve, reject) => {
+      if (!this._socket) {
+        reject(new Error("没有 web 端 socket 连接"));
+        return;
+      }
+
+      const id = uuid();
+      this._callbacks.set(id, resolve);
+      const message = {
+        id,
+        method,
+        params,
+      };
+      this._socket.send(JSON.stringify(message));
     });
+  }
+
+  async send({
+    method,
+    params,
+  }: {
+    method: `mcp:tool.${string}` | `mcp:resource.${string}`;
+    params: unknown[];
+  }) : Promise<{
+    content: {
+      type: 'text';
+      text: string;
+    }[];
+    isError?: true;
+  }> {
+    try {
+      const { result, error } = (await this._call({ method, params })) as {
+        result: unknown;
+        error: unknown;
+      };
+      if (error) {
+        throw new Error(error as string);
+      }
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result),
+          },
+        ],
+      };
+    } catch (err: unknown) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: (err as Error)?.message,
+          },
+        ],
+        isError: true,
+      };
+    }
   }
 
   disconnect() {

@@ -1,10 +1,12 @@
-import { WSClient } from './ws'
+import { WSClient } from "./ws";
 
 export type Tool<T extends Record<string, unknown>> = {
   name: string;
   params: T;
-  handler: (params: T) => Promise<{contents: {uri: string, text: string}[] }>;
-}
+  handler: (
+    params: T
+  ) => Promise<{ contents: { uri: string; text: string }[] }>;
+};
 
 function tool(functionChain: string) {
   return `mcp:tool.${functionChain}`;
@@ -16,14 +18,15 @@ class Tools {
   constructor(ws: WSClient) {
     this.ws = ws;
   }
-  
-  _callExtension(method: string, params: unknown[]) {
+
+  async callExtension(method: string, ...params: unknown[]) {
     const message = {
       method: tool(method) as `mcp:tool.${string}`,
-      params: params
-    }
-    this.ws.send(message)
+      params: params,
+    };
+    const response = await this.ws.send(message);
+    return response
   }
 }
 
-export { Tools }
+export { Tools };
