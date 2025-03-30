@@ -48,7 +48,7 @@ class WSClient {
 
   private _call(
     method: `mcp:tool.${string}` | `mcp:resource.${string}`,
-    params?: Record<string, unknown>
+    ...params: unknown[]
   ) {
     return new Promise((resolve, reject) => {
       if (!this._socket) {
@@ -61,7 +61,7 @@ class WSClient {
       const message = {
         id,
         method,
-        params: params || {},
+        params,
       };
       this._socket.send(JSON.stringify(message));
     });
@@ -69,7 +69,7 @@ class WSClient {
 
   async send(
     method: `mcp:tool.${string}` | `mcp:resource.${string}`,
-    params?: Record<string, unknown>
+    ...params: unknown[]
   ): Promise<{
     content: {
       type: "text";
@@ -78,7 +78,7 @@ class WSClient {
     isError?: true;
   }> {
     try {
-      const { result = "", error } = (await this._call(method, params)) as {
+      const { result = "", error } = (await this._call(method, ...params)) as {
         result: string;
         error: string;
       };

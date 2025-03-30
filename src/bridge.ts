@@ -12,8 +12,8 @@ class McpExportBridge {
     this.prefix = prefix;
   }
 
-  async callExtension(method: string, params?: Record<string, unknown>) {
-    const response = await this.ws.send(this.prefix(method), params);
+  async callExtension(method: string, ...params: unknown[]) {
+    const response = await this.ws.send(this.prefix(method), ...params);
     return response;
   }
 }

@@ -23,18 +23,18 @@ export class Client {
     this.connected = true;
   }
 
-  async callToolExtension(toolName: string, params: Record<string, unknown>) {
+  async callToolExtension(toolName: string, ...params: unknown[]) {
     if (!this.connected) {
       throw new Error("Client is not connected");
     }
-    return this.tools.callExtension(toolName, params);
+    return this.tools.callExtension(toolName, ...params);
   }
 
-  async callResourceExtension(resourceName: string, params?: Record<string, unknown>) {
+  async callResourceExtension(resourceName: string, ...params: unknown[]) {
     if (!this.connected) {
       throw new Error("Client is not connected");
     }
-    return this.resources.callExtension(resourceName, params);
+    return this.resources.callExtension(resourceName, ...params);
   }
 
   async dispose() {
