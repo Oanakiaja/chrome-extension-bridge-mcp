@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/oanakiaja-chrome-extension-bridge-mcp-badge.png)](https://mseep.ai/app/oanakiaja-chrome-extension-bridge-mcp)
+
 # Chrome Extension Bridge MCP
 
 A Chrome extension that establishes a WebSocket connection between web pages and a local MCP server. This allows you to interact with web page resources and execute functions from your mcp server.
